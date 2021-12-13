@@ -3,9 +3,12 @@
 (*----------------------------------------------------------------------------*]
 Namig: Definirajte pomožno funkcijo za obračanje seznamov.
 [*----------------------------------------------------------------------------*)
-
-let rec reverse = ()
-
+let reverse sez = 
+  let rec reverse_aux acc list = match list with
+    |[] -> acc
+    | glava :: rep -> reverse_aux (glava::acc) rep 
+  in 
+  reverse_aux [] sez
 (*----------------------------------------------------------------------------*]
  Funkcija [repeat x n] vrne seznam [n] ponovitev vrednosti [x]. Za neprimerne
  vrednosti [n] funkcija vrne prazen seznam.
@@ -15,8 +18,8 @@ let rec reverse = ()
  # repeat "A" (-2);;
  - : string list = []
 [*----------------------------------------------------------------------------*)
-
-let rec repeat = ()
+let rec repeat x n = 
+  if n <= 0 then [] else x :: (repeat x (n-1))
 
 (*----------------------------------------------------------------------------*]
  Funkcija [range] sprejme število in vrne seznam vseh celih števil od 0 do
@@ -26,8 +29,16 @@ let rec repeat = ()
  # range 10;;
  - : int list = [0; 1; 2; 3; 4; 5; 6; 7; 8; 9; 10]
 [*----------------------------------------------------------------------------*)
-
-let rec range = ()
+                           (*
+                             let rec range n = 
+                               let rec aux m acc =
+                                 if m < 0 then acc else (range (m-1) (m::acc))
+                               in aux n []*)
+  
+(* slabše napisana funkcija*)
+    (*let rec range n = 
+       if n < 0 then [] 
+       else (range(n-1)) @ [n]*)
 
 (*----------------------------------------------------------------------------*]
  Funkcija [map f list] sprejme seznam [list] oblike [x0; x1; x2; ...] in
@@ -39,7 +50,9 @@ let rec range = ()
  - : int list = [2; 3; 4; 5; 6]
 [*----------------------------------------------------------------------------*)
 
-let rec map = ()
+let rec map f l = match l with
+  |[] -> []
+  |glava :: rep -> (f glava) :: map f rep
 
 (*----------------------------------------------------------------------------*]
  Funkcija [map_tlrec] je repno rekurzivna različica funkcije [map].
@@ -66,8 +79,17 @@ let rec map_tlrec = ()
  # mapi (+) [0; 0; 0; 2; 2; 2];;
  - : int list = [0; 1; 2; 5; 6; 7]
 [*----------------------------------------------------------------------------*)
-
-let rec mapi = ()
+  (*
+      let rec mapi f l = 
+        let rec map_aux f index ostane acc = match l with 
+          | [] -> acc
+          | glava :: rep -> 
+              let nov_element = f glava index in
+              let nov_acc = nov_element :: acc in
+              map_aux f (index+1) rep nov_acc
+        in 
+        reverse (map_aux 0 l [])
+               *)
 
 (*----------------------------------------------------------------------------*]
  Funkcija [zip] sprejme dva seznama in vrne seznam parov istoležnih
@@ -78,8 +100,10 @@ let rec mapi = ()
  # zip [1; 1; 1; 1] [1; 2; 3; 4; 5];;
  Exception: Failure "Different lengths of input lists.".
 [*----------------------------------------------------------------------------*)
-
-let rec zip = ()
+let rec zip l1 l2 = match (l1,l2) with
+  |([],[]) -> []
+  |(x::xs, y::ys) -> (x,y) :: zip xs ys
+  |_ -> failwith "Napaka v dolžini seznama"
 
 (*----------------------------------------------------------------------------*]
  Funkcija [unzip] je inverz funkcije [zip], torej sprejme seznam parov
@@ -112,8 +136,8 @@ let rec unzip_tlrec = ()
  # loop (fun x -> x < 10) ((+) 4) 4;;
  - : int = 12
 [*----------------------------------------------------------------------------*)
-
-let rec loop = ()
+let rec loop condition f x =
+  if condition x then (loop condition f f x) else x
 
 (*----------------------------------------------------------------------------*]
  Funkcija [fold_left_no_acc f list] sprejme seznam [x0; x1; ...; xn] in
@@ -124,8 +148,12 @@ let rec loop = ()
  # fold_left_no_acc (^) ["F"; "I"; "C"; "U"; "S"];;
  - : string = "FICUS"
 [*----------------------------------------------------------------------------*)
+let rec fold_left_no_acc f list = match list with
+  |[] -> failwith "Prekratek seznam" 
+  |_::[] -> failwith "Napaka"
+  |x::y::[] -> f x y
+  |x::y::xs -> fold_left_no_acc f ((f x y) :: rest) 
 
-let rec fold_left_no_acc = ()
 
 (*----------------------------------------------------------------------------*]
  Funkcija [apply_sequence f x n] vrne seznam zaporednih uporab funkcije [f] na

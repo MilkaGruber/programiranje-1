@@ -55,3 +55,6 @@ let rec preslikaj f sez =
     match sez with
     | [] -> []
     | glava :: rep -> f glava :: preslikaj f rep
+
+let razdalja p1 p2 =
+    (fst p1 -. fst p2) ** 2.0 +. ((snd p1 -. snd p2) ** 2.0) ** 0.5

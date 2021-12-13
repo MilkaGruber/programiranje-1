@@ -6,6 +6,7 @@
  Oglejmo si dva pristopa k izboljšavi varnosti pri uporabi valut.
 [*-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=*)
 
+
 (*----------------------------------------------------------------------------*]
  Definirajte tipa [euro] in [dollar], kjer ima vsak od tipov zgolj en
  konstruktor, ki sprejme racionalno število.
@@ -20,8 +21,13 @@
  # dollar_to_euro (Dollar 0.5);;
  - : euro = Euro 0.4305
 [*----------------------------------------------------------------------------*)
+type euro = Euro of float
+type dollar = Dollar of float
 
+let dollar_to_euro dollar = match dollar with
+| Dollar d -> Euro (0.89 *. d)
 
+let euro_to_dollar (Euro d) = Dollar (d *. 1.1)
 
 (*----------------------------------------------------------------------------*]
  Definirajte tip [currency] kot en vsotni tip z konstruktorji za jen, funt
@@ -34,8 +40,13 @@
  # to_pound (Yen 100.);;
  - : currency = Pound 0.007
 [*----------------------------------------------------------------------------*)
+type currency = Jen of float | Funt of float | Svedska_krona of float | Svicarski_franki of float
 
-
+let to_pound valuta = match valuta with
+| Jen v -> Funt (0.0065 *. v)
+| Funt _ -> valuta
+| Svedska_krona v -> Funt (0.083 *. v)
+| Svicarski_franki v -> Funt (0.8 *. v)
 
 (*-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=*]
  Želimo uporabljati sezname, ki hranijo tako cela števila kot tudi logične
@@ -47,6 +58,7 @@
  [Nil] (oz. [] v Ocamlu) in pa konstruktorjem za člen [Cons(x, xs)] (oz.
  x :: xs v Ocamlu).
 [*-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=*)
+type my_list = Prazen | Neprazen (int * my_list)
 
 (*----------------------------------------------------------------------------*]
  Definirajte tip [intbool_list] z konstruktorji za:
@@ -56,8 +68,12 @@
 
  Nato napišite testni primer, ki bi predstavljal "[5; true; false; 7]".
 [*----------------------------------------------------------------------------*)
+type intbool_list = 
+       |Nil 
+|      |KonInt of (int * intbool_list) 
+       |KonBool of (bool * intbool_list)
 
-
+let testni_primer == KonBool (True, KonBool (false, KonInt (7, Nil)))
 
 (*----------------------------------------------------------------------------*]
  Funkcija [intbool_map f_int f_bool ib_list] preslika vrednosti [ib_list] v nov
@@ -65,7 +81,10 @@
  oz. [f_bool].
 [*----------------------------------------------------------------------------*)
 
-let rec intbool_map = ()
+let rec intbool_map fi fb list = match list with
+| Nil -> Nil
+| KonInt (int, rep) -> KonInt(fi int, intbool_map fi fb rep)
+| KonBool (bool, rep) -> KonBool(fb bool, intbool_map fi fb rep) 
 
 (*----------------------------------------------------------------------------*]
  Funkcija [intbool_reverse] obrne vrstni red elementov [intbool_list] seznama.
@@ -80,7 +99,13 @@ let rec intbool_reverse = ()
  vrednosti. Funkcija je repno rekurzivna in ohranja vrstni red elementov.
 [*----------------------------------------------------------------------------*)
 
-let rec intbool_separate = ()
+let rec intbool_separate list =
+       let rec seperate_aux l ints bools = match l with
+       | Nil -> ()
+       | KonInt (i, rep) -> (List.rev ints, List.rev bools)
+       |KonBool (b, rep) -> seperate_aux rep ints (b::bools)
+in
+seperate_aux list [] []
 
 (*-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=*]
  Določeni ste bili za vzdrževalca baze podatkov za svetovno priznano čarodejsko
@@ -98,7 +123,8 @@ let rec intbool_separate = ()
  [specialisation], ki loči med temi zaposlitvami.
 [*----------------------------------------------------------------------------*)
 
-
+type magic = Fire | Frost | Arcane
+type specialisation = Historian | Teacher | Researcher 
 
 (*----------------------------------------------------------------------------*]
  Vsak od čarodejev začne kot začetnik, nato na neki točki postane študent,
@@ -115,8 +141,13 @@ let rec intbool_separate = ()
  - : wizard = {name = "Matija"; status = Employed (Fire, Teacher)}
 [*----------------------------------------------------------------------------*)
 
+type status = Newbie | Student of (magic * int) | Employed of (magic * specialisation)
+type wizard = {
+       name: String;
+       status: status;
+       }
 
-
+let profesor = {name = "Matija"; status = Employed (Fire, Teacher)}
 (*----------------------------------------------------------------------------*]
  Želimo prešteti koliko uporabnikov posamezne od vrst magije imamo na akademiji.
  Definirajte zapisni tip [magic_counter], ki v posameznem polju hrani število
@@ -128,7 +159,20 @@ let rec intbool_separate = ()
  - : magic_counter = {fire = 1; frost = 1; arcane = 2}
 [*----------------------------------------------------------------------------*)
 
+type magic_counter = {
+       fire: int;
+       frost: int;
+       arcane: int;
+}
 
+let update counter magic_type = match magic_type with
+       | Arcane -> {arcane = counter.arcane + 1; frost = counter.frost + 1; fire = counter.fire + 1}
+       | Fire -> {counter with fire = counter.fire + 1}
+       | Frost -> {counter with frost = zmrzjeni + 1}
+
+let zero_magic = {
+       fire=0; frost=0, arcane=0
+}
 
 (*----------------------------------------------------------------------------*]
  Funkcija [count_magic] sprejme seznam čarodejev in vrne števec uporabnikov
@@ -138,8 +182,14 @@ let rec intbool_separate = ()
  - : magic_counter = {fire = 3; frost = 0; arcane = 0}
 [*----------------------------------------------------------------------------*)
 
-let rec count_magic = ()
-
+let rec count_magic lst = 
+       let count_aux acc l = match l with
+       | [] -> acc
+       | x::xs -> match x.status with
+              | Newbie -> count_aux acc xs
+              | Teacher -> count_aux (update acc m) xs
+              | Employed -> count_aux (update acc m) xs
+in count_aux zero_magic lst
 (*----------------------------------------------------------------------------*]
  Želimo poiskati primernega kandidata za delovni razpis. Študent lahko postane
  zgodovinar po vsaj treh letih študija, raziskovalec po vsaj štirih letih

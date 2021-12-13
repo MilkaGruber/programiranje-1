@@ -5,6 +5,7 @@
 # literarnih besedil, kot je na primer koroška narodna pripovedka *Hvaležni
 # medved*.
 ###############################################################################
+import re
 
 test_text = """Gori nekje v gorah, ne ve se več, ali je bilo pri Macigoju ali
 Naravniku, je šivala gospodinja v senci pod drevesom in zibala otroka. Naenkrat
@@ -25,7 +26,10 @@ medved. Zvrhano zibelko sladkih hrušk mi je prinesel za en sam izdrt trn"."""
 # >>> find_words(test_text, 'de')
 # {'izdere', 'debel', 'oddide', 'začudeno'}
 ###############################################################################
-
+def find_words(besedilo, podniz):
+    pattern = r"\b\w*" + podniz  + r"\w*\b"
+    m = re.findall(pattern, besedilo)
+    return set(m)
 
 ###############################################################################
 # 2) Sestavite funkcijo [find_prefix], ki vrne množico vseh besed, ki se
@@ -34,7 +38,10 @@ medved. Zvrhano zibelko sladkih hrušk mi je prinesel za en sam izdrt trn"."""
 # >>> find_prefix(test_text, 'zi')
 # {'zibala', 'zibel', 'zibelko'}
 ###############################################################################
-
+def find_prefix(besedilo, podniz):
+    pattern = r"\b" + podniz + r"\w*\b"
+    m = re.findall(pattern, besedilo)
+    return set(m)
 
 ###############################################################################
 # 3) Sestavite funkcijo [find_suffix], ki vrne množico vseh besed, ki se
@@ -43,7 +50,10 @@ medved. Zvrhano zibelko sladkih hrušk mi je prinesel za en sam izdrt trn"."""
 # >>> find_suffix(test_text, 'la')
 # {'zibala', 'razveselila', 'prestrašila', 'šivala', 'opazila', 'tla'}
 ###############################################################################
-
+def find_suffix(besedilo, podniz):
+    pattern = r"\b\w*" + podniz  + r"\b"
+    m = re.findall(pattern, besedilo)
+    return set(m)
 
 ###############################################################################
 # 4) Sestavite funkcijo [double_letters], ki sprejme niz in vrne množico vseh
@@ -52,3 +62,9 @@ medved. Zvrhano zibelko sladkih hrušk mi je prinesel za en sam izdrt trn"."""
 # >>> double_letters('A volunteer is worth twenty pressed men.')
 # {'volunteer', 'pressed'}
 ###############################################################################
+def double_letters(besedilo):
+    pattern = r"(\b\w*(\w)\2\w*\b)"
+    match = re.findall(pattern, besedilo)
+    return {
+        g[0] for g in match
+    }
