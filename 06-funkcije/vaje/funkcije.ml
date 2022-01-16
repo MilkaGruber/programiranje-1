@@ -62,7 +62,13 @@ let rec map f l = match l with
  - : int list = [2; 3; 4; 5; 6]
 [*----------------------------------------------------------------------------*)
 
-let rec map_tlrec = ()
+let map_tlrec f list = 
+  let rec map_tlrec_aux acc sez = match sez with
+  | [] -> acc
+  | glava :: rep -> map_tlrec_aux rep (f glava :: acc)
+in
+  map_tlrec_aux [] list 
+
 
 (*----------------------------------------------------------------------------*]
  Funkcija [mapi] je ekvivalentna python kodi:
@@ -79,17 +85,13 @@ let rec map_tlrec = ()
  # mapi (+) [0; 0; 0; 2; 2; 2];;
  - : int list = [0; 1; 2; 5; 6; 7]
 [*----------------------------------------------------------------------------*)
-  (*
-      let rec mapi f l = 
-        let rec map_aux f index ostane acc = match l with 
-          | [] -> acc
-          | glava :: rep -> 
-              let nov_element = f glava index in
-              let nov_acc = nov_element :: acc in
-              map_aux f (index+1) rep nov_acc
-        in 
-        reverse (map_aux 0 l [])
-               *)
+
+let mapi f list =
+  let rec mapi_aux list i = 
+    match list with
+    | [] -> []
+    | glava :: rep -> (f i glava) :: (mapi_aux rep (i + 1))
+  in mapi_aux list 0
 
 (*----------------------------------------------------------------------------*]
  Funkcija [zip] sprejme dva seznama in vrne seznam parov istoležnih
@@ -113,7 +115,9 @@ let rec zip l1 l2 = match (l1,l2) with
  - : int list * string list = ([0; 1; 2], ["a"; "b"; "c"])
 [*----------------------------------------------------------------------------*)
 
-let rec unzip = ()
+let rec unzip list = match list with
+| [] -> ([], [])
+| (x, y) :: rep -> let (list1, list2) = unzip rep in (x :: list1, y :: list2)
 
 (*----------------------------------------------------------------------------*]
  Funkcija [unzip_tlrec] je repno rekurzivna različica funkcije [unzip].
@@ -122,7 +126,11 @@ let rec unzip = ()
  - : int list * string list = ([0; 1; 2], ["a"; "b"; "c"])
 [*----------------------------------------------------------------------------*)
 
-let rec unzip_tlrec = ()
+let unzip_tlrec list = 
+  let rec unzip_aux acc1 acc2 list = match list with
+  |[] -> (reverse acc1, reverse acc2)
+  |(x, y) :: rep -> unzip_aux (x :: acc1) (y :: acc2) rep
+in unzip_aux [] [] list 
 
 (*----------------------------------------------------------------------------*]
  Funkcija [loop condition f x] naj se izvede kot python koda:
@@ -136,8 +144,15 @@ let rec unzip_tlrec = ()
  # loop (fun x -> x < 10) ((+) 4) 4;;
  - : int = 12
 [*----------------------------------------------------------------------------*)
-let rec loop condition f x =
-  if condition x then (loop condition f f x) else x
+
+let rec loop1 condition f x = if condition x then loop1 condition f (f x) else x
+
+let rec loop2 condition f x =
+  if condition x then 
+    let x = f x in 
+    loop2 condition f x
+else 
+  x
 
 (*----------------------------------------------------------------------------*]
  Funkcija [fold_left_no_acc f list] sprejme seznam [x0; x1; ...; xn] in
@@ -148,11 +163,13 @@ let rec loop condition f x =
  # fold_left_no_acc (^) ["F"; "I"; "C"; "U"; "S"];;
  - : string = "FICUS"
 [*----------------------------------------------------------------------------*)
+
+(*
 let rec fold_left_no_acc f list = match list with
   |[] -> failwith "Prekratek seznam" 
   |_::[] -> failwith "Napaka"
   |x::y::[] -> f x y
-  |x::y::xs -> fold_left_no_acc f ((f x y) :: rest) 
+  |x::y::xs -> fold_left_no_acc f ((f x y) :: rest)  *)
 
 
 (*----------------------------------------------------------------------------*]
