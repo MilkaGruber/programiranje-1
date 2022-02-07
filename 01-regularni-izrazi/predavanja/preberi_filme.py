@@ -21,3 +21,6 @@ for zadetek in re.finditer(vzorec, vsebina):
     count += 1
 print(count)
 
+from pathlib import Path
+for f in Path().cwd().glob("../*.ext"):
+    print(f)

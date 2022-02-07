@@ -17,7 +17,7 @@ let square x = x * x
  - : bool = false
 [*----------------------------------------------------------------------------*)
 
-let middle_of_triple (_, y, _)= y
+let middle_of_triple (_, y, _) = y
 
 let middle_of_triple trp = 
   let (_, drugi, _) = trp in
@@ -48,6 +48,7 @@ let starting_element sez = match sez with
  - : int = 48
 [*----------------------------------------------------------------------------*)
 
+
 let rec multiply sez = match sez with
   | [] -> 1
   | glava :: rep -> glava * multiply rep
@@ -72,6 +73,7 @@ let rec sum_int_pairs = function
 | (x, y) :: rep -> x + y :: (sum_int_pairs rep)
 
 
+
 (*----------------------------------------------------------------------------*]
  Funkcija [get k list] poišče [k]-ti element v seznamu [list]. Številčenje
  elementov seznama (kot ponavadi) pričnemo z 0. Če je k negativen, funkcija
@@ -81,9 +83,10 @@ let rec sum_int_pairs = function
  - : int = 1
 [*----------------------------------------------------------------------------*)
 
-let rec get k sez = match sez with
-|  [] -> failwith "Ni več seznama"
-|  glava :: rep -> if k <= 0 then glava else get (k-1) rep
+let rec get sez k = match sez with
+| [] -> failwith "Prekratek seznam"
+| glava :: rep -> if k = 0 then glava else get rep (k-1)
+
 
 (*----------------------------------------------------------------------------*]
  Funkcija [double] podvoji pojavitve elementov v seznamu.
@@ -111,9 +114,15 @@ let rec double sez = match sez with
  - : int list = [1; 0; 0; 0; 0; 0]
 [*----------------------------------------------------------------------------*)
 
+let rec insert x k list =  match list with
+| [] -> [x]
+| glava :: rep -> if k = 0 then x :: list else glava :: (insert x (k-1) rep)
+
 let rec insert nov_element k sez = match sez with
   | [] -> [nov_element]
   | prvi :: rep -> if k <= 0 then nov_element :: (sez) else prvi :: (insert nov_element (k-1) rep)
+
+
 
 (*----------------------------------------------------------------------------*]
  Funkcija [divide k list] seznam razdeli na dva seznama. Prvi vsebuje prvih [k]
@@ -131,6 +140,7 @@ let rec divide k sez = match sez with
   |x::rep -> if k <= 0 then ([], sez) else 
     let (prvi, drugi) = divide (k-1) rep in
     (x::prvi, drugi)
+
 
 (*----------------------------------------------------------------------------*]
  Funkcija [rotate n list] seznam zavrti za [n] mest v levo. Predpostavimo, da
@@ -151,7 +161,9 @@ let rec rotate n sez =
  - : int list = [2; 3; 2; 3]
 [*----------------------------------------------------------------------------*)
 
-let rec remove = ()
+let rec remove x list = match list with
+| [] -> []
+| glava :: rep -> if glava = x then (remove x rep) else (glava :: remove x rep)
 
 (*----------------------------------------------------------------------------*]
  Funkcija [is_palindrome] za dani seznam ugotovi ali predstavlja palindrom.
@@ -163,8 +175,12 @@ let rec remove = ()
  - : bool = false
 [*----------------------------------------------------------------------------*)
 
-let rec is_palindrome = ()
-
+let is_palindrome list = 
+  let rec obrni list = match list with 
+| [] -> [] 
+| glava :: rep -> (obrni rep) @ [glava]
+in 
+list = obrni list
 (*----------------------------------------------------------------------------*]
  Funkcija [max_on_components] sprejme dva seznama in vrne nov seznam, katerega
  elementi so večji od istoležnih elementov na danih seznamih. Skupni seznam ima
@@ -174,7 +190,17 @@ let rec is_palindrome = ()
  - : int list = [5; 4; 3; 3; 4]
 [*----------------------------------------------------------------------------*)
 
-let rec max_on_components = ()
+let rec max_on_components sez1 sez2 = match (sez1, sez2) with
+| ([],[]) -> []
+| ([], glava2 :: rep2) -> []
+| (glava1 :: rep1, []) -> []
+| (glava1 :: rep1, glava2 :: rep2) -> if glava1 > glava2 then (glava1 :: (max_on_components rep1 rep2))
+else (glava2 :: (max_on_components rep1 rep2))
+
+let rec max_on_components sez1 sez2 = match (sez1, sez2) with
+| (glava1 :: rep1, glava2 :: rep2) -> if glava1 > glava2 then (glava1 :: (max_on_components rep1 rep2))
+else (glava2 :: (max_on_components rep1 rep2))
+| _ -> []
 
 (*----------------------------------------------------------------------------*]
  Funkcija [second_largest] vrne drugo največjo vrednost v seznamu. Pri tem se
@@ -186,4 +212,15 @@ let rec max_on_components = ()
  - : int = 10
 [*----------------------------------------------------------------------------*)
 
-let rec second_largest = ()
+let rec largest list = match list with 
+  | [] -> failwith "Maksimum ne obstaja"
+  | x :: [] -> x
+  | glava :: rep -> max glava (largest rep)
+
+let rec second_largest list = 
+  let rec largest list = match list with 
+  | [] -> failwith "Maksimum ne obstaja"
+  | x :: [] -> x
+  | glava :: rep -> max glava (largest rep) 
+in
+largest (remove (largest list) list)
